@@ -479,9 +479,17 @@
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     if(webView == self.wkWebView) {
 
-        NSSet *validSchemes = [NSSet setWithArray:@[@"http", @"https", @"mailto", @"maps", @"tel"]];
+        NSSet *validSchemes = [NSSet setWithArray:@[@"http", @"https"]];
+        NSSet *validSchemes2 = [NSSet setWithArray:@[@"mailto", @"maps", @"tel"]];
         NSURL *URL = navigationAction.request.URL;
         if([validSchemes containsObject:URL.scheme]) {
+            if (!navigationAction.targetFrame) {
+                [self loadURL:URL];
+                decisionHandler(WKNavigationActionPolicyCancel);
+                return;
+            }
+        }
+        else if([validSchemes2 containsObject:URL.scheme]) {
             if ([app canOpenURL:url])
             {
                 [app openURL:url];
