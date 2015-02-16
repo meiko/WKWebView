@@ -491,9 +491,9 @@
         }
         else if([validSchemes2 containsObject:URL.scheme]) {
             UIApplication *app = [UIApplication sharedApplication];
-            if ([app canOpenURL:url])
+            if ([app canOpenURL:URL])
             {
-                [app openURL:url];
+                [app openURL:URL];
                 decisionHandler(WKNavigationActionPolicyCancel);
                 return;
             }
