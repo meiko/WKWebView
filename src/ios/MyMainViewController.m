@@ -472,16 +472,32 @@
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
 
-  if (!navigationAction.targetFrame) {
+    if(webView != self.wkWebView) {
+        decisionHandler(WKNavigationActionPolicyAllow);
+        return;
+    }
+
+    if (!navigationAction.targetFrame) {
     // links with target="_blank" need to open outside the app, but WKWebView doesn't allow it currently
     NSURL *url = navigationAction.request.URL;
     NSLog(@"Navigating to %@", url);
     UIApplication *app = [UIApplication sharedApplication];
-    if ([app canOpenURL:url]) {
-      [app openURL:url];
+        if ([app canOpenURL:url]) {
+            [app openURL:url];
+            decisionHandler(WKNavigationActionPolicyCancel);
+            return;
+        }
     }
-  }
-  decisionHandler(WKNavigationActionPolicyAllow);
+    if ([url.scheme isEqualToString:@"tel"])
+    {
+        if ([app canOpenURL:url])
+        {
+            [app openURL:url];
+            decisionHandler(WKNavigationActionPolicyCancel);
+            return;
+        }
+    }
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
 
 #pragma mark WKScriptMessageHandler implementation
