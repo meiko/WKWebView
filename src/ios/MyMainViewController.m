@@ -12,11 +12,13 @@
 @property (nonatomic, readwrite, retain) NSArray *startupPluginNames;
 @end
 
-@interface MyMainViewController () {
+@interface MyMainViewController () <UIAlertViewDelegate> {
   NSInteger _userAgentLockToken;
   CDVWebViewDelegate* _webViewDelegate;
   CDVWebViewUIDelegate* _webViewUIDelegate;
   BOOL _targetExistsLocally;
+  NSURL *URLToLaunchWithPermission;
+  UIAlertView *externalAppPermissionAlertView;
 }
 @end
 
@@ -36,6 +38,7 @@
     startFilePath = [startFilePath stringByDeletingLastPathComponent];
     self.wwwFolderName = startFilePath;
     self.alreadyLoaded = false;
+    self.externalAppPermissionAlertView = [[UIAlertView alloc] initWithTitle:@"Leave this app?" message:@"This web page is trying to open an outside app. Do you want to open it?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Open App", nil];
   }
   
   // configure listeners which fires when the application goes away
@@ -471,47 +474,40 @@
 }
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+        if(webView == self.wkWebView) {
 
-    if(webView != self.wkWebView) {
+                        NSSet *validSchemes = [NSSet setWithArray:@[@"http", @"https"]];
+
+                        NSURL *URL = navigationAction.request.URL;
+                if([validSchemes containsObject:URL.scheme]) {
+                        if(!navigationAction.targetFrame) {
+                                [self loadURL:URL];
+                                decisionHandler(WKNavigationActionPolicyCancel);
+                                return;
+                            }
+                    }
+                else if([[UIApplication sharedApplication] canOpenURL:URL]) {
+                        self.URLToLaunchWithPermission = URL;
+                        [self.externalAppPermissionAlertView show];
+                        decisionHandler(WKNavigationActionPolicyCancel);
+                        return;
+                    }
+            }
         decisionHandler(WKNavigationActionPolicyAllow);
-        return;
     }
 
-    // links with target="_blank" need to open outside the app, but WKWebView doesn't allow it currently
-    NSURL *url = navigationAction.request.URL;
-    NSLog(@"Navigating to %@", url);
-    UIApplication *app = [UIApplication sharedApplication];
+#pragma mark - UIAlertViewDelegate
 
-    if (!navigationAction.targetFrame) {
-
-        if ([app canOpenURL:url]) {
-            [app openURL:url];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        }
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+        if(alertView == self.externalAppPermissionAlertView) {
+                if(buttonIndex != alertView.cancelButtonIndex) {
+                        [[UIApplication sharedApplication] openURL:self.URLToLaunchWithPermission];
+                    }
+                self.URLToLaunchWithPermission = nil;
+            }
     }
-    if ([url.scheme isEqualToString:@"tel"])
-    {
 
-        if ([app canOpenURL:url])
-        {
-            [app openURL:url];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        }
-    }
-    if ([url.scheme isEqualToString:@"mailto"])
-    {
 
-        if ([app canOpenURL:url])
-        {
-            [app openURL:url];
-            decisionHandler(WKNavigationActionPolicyCancel);
-            return;
-        }
-    }
-    decisionHandler(WKNavigationActionPolicyAllow);
-}
 
 #pragma mark WKScriptMessageHandler implementation
 
