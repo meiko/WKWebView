@@ -482,8 +482,9 @@
         NSSet *validSchemes = [NSSet setWithArray:@[@"http", @"https", @"mailto", @"maps", @"tel"]];
         NSURL *URL = navigationAction.request.URL;
         if([validSchemes containsObject:URL.scheme]) {
-            if(!navigationAction.targetFrame) {
-                [self loadURL:URL];
+            if ([app canOpenURL:url])
+            {
+                [app openURL:url];
                 decisionHandler(WKNavigationActionPolicyCancel);
                 return;
             }
