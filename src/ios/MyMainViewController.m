@@ -12,13 +12,16 @@
 @property (nonatomic, readwrite, retain) NSArray *startupPluginNames;
 @end
 
-@interface MyMainViewController () <UIAlertViewDelegate> {
+@interface MyMainViewController () <UIAlertViewDelegate>
+@property (nonatomic, strong) NSURL *URLToLaunchWithPermission;
+@property (nonatomic, strong) UIAlertView *externalAppPermissionAlertView;
+@end
+
+@interface MyMainViewController () {
   NSInteger _userAgentLockToken;
   CDVWebViewDelegate* _webViewDelegate;
   CDVWebViewUIDelegate* _webViewUIDelegate;
   BOOL _targetExistsLocally;
-  NSURL *URLToLaunchWithPermission;
-  UIAlertView *externalAppPermissionAlertView;
 }
 @end
 
