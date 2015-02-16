@@ -482,6 +482,7 @@
     NSURL *url = navigationAction.request.URL;
     NSLog(@"Navigating to %@", url);
     UIApplication *app = [UIApplication sharedApplication];
+    UIApplication *app = [UIApplication sharedApplication];
         if ([app canOpenURL:url]) {
             [app openURL:url];
             decisionHandler(WKNavigationActionPolicyCancel);
