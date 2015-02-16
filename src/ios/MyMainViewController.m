@@ -500,6 +500,16 @@
             return;
         }
     }
+    if ([url.scheme isEqualToString:@"mail"])
+    {
+
+        if ([app canOpenURL:url])
+        {
+            [app openURL:url];
+            decisionHandler(WKNavigationActionPolicyCancel);
+            return;
+        }
+    }
     decisionHandler(WKNavigationActionPolicyAllow);
 }
 
