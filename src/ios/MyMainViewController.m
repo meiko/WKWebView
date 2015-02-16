@@ -477,27 +477,26 @@
 }
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-        if(webView == self.wkWebView) {
+    if(webView == self.wkWebView) {
 
-                        NSSet *validSchemes = [NSSet setWithArray:@[@"http", @"https"]];
-
-                        NSURL *URL = navigationAction.request.URL;
-                if([validSchemes containsObject:URL.scheme]) {
-                        if(!navigationAction.targetFrame) {
-                                [self loadURL:URL];
-                                decisionHandler(WKNavigationActionPolicyCancel);
-                                return;
-                            }
-                    }
-                else if([[UIApplication sharedApplication] canOpenURL:URL]) {
-                        self.URLToLaunchWithPermission = URL;
-                        [self.externalAppPermissionAlertView show];
-                        decisionHandler(WKNavigationActionPolicyCancel);
-                        return;
-                    }
+        NSSet *validSchemes = [NSSet setWithArray:@[@"http", @"https", @"mailto", @"maps", @"tel"]];
+        NSURL *URL = navigationAction.request.URL;
+        if([validSchemes containsObject:URL.scheme]) {
+            if(!navigationAction.targetFrame) {
+                [self loadURL:URL];
+                decisionHandler(WKNavigationActionPolicyCancel);
+                return;
             }
-        decisionHandler(WKNavigationActionPolicyAllow);
+        }
+        else if([[UIApplication sharedApplication] canOpenURL:URL]) {
+            self.URLToLaunchWithPermission = URL;
+            [self.externalAppPermissionAlertView show];
+            decisionHandler(WKNavigationActionPolicyCancel);
+            return;
+        }
     }
+    decisionHandler(WKNavigationActionPolicyAllow);
+}
 
 #pragma mark - UIAlertViewDelegate
 
