@@ -490,6 +490,7 @@
             }
         }
         else if([validSchemes2 containsObject:URL.scheme]) {
+            UIApplication *app = [UIApplication sharedApplication];
             if ([app canOpenURL:url])
             {
                 [app openURL:url];
