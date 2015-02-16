@@ -470,15 +470,12 @@
   [CDVUserAgentUtil releaseLock:&_userAgentLockToken];
 }
 
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler
-{
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+
     if(webView != self.wkWebView) {
         decisionHandler(WKNavigationActionPolicyAllow);
         return;
     }
-
-    UIApplication *app = [UIApplication sharedApplication];
-    NSURL         *url = navigationAction.request.URL;
 
     if (!navigationAction.targetFrame) {
         if ([app canOpenURL:url]) {
