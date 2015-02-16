@@ -500,7 +500,7 @@
             return;
         }
     }
-    if ([url.scheme isEqualToString:@"mail"])
+    if ([url.scheme isEqualToString:@"mailto"])
     {
 
         if ([app canOpenURL:url])
