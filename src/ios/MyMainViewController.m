@@ -14,6 +14,9 @@
 
 @interface MyMainViewController () <UIAlertViewDelegate>
 @property (nonatomic, strong) NSURL *URLToLaunchWithPermission;
+@property (nonatomic, strong) UIAlertView *externalTelAppPermissionAlertView;
+@property (nonatomic, strong) UIAlertView *externalMailAppPermissionAlertView;
+@property (nonatomic, strong) UIAlertView *externalMapPermissionAlertView;
 @property (nonatomic, strong) UIAlertView *externalAppPermissionAlertView;
 @end
 
@@ -41,6 +44,9 @@
         startFilePath = [startFilePath stringByDeletingLastPathComponent];
         self.wwwFolderName = startFilePath;
         self.alreadyLoaded = false;
+        self.externalTelAppPermissionAlertView = [[UIAlertView alloc] initWithTitle:@"Telefonanruf" message:@"Möchten Sie einen Anruf tätigen?" delegate:self cancelButtonTitle:@"Abbrechen" otherButtonTitles:@"Anrufen", nil];
+        self.externalMailAppPermissionAlertView = [[UIAlertView alloc] initWithTitle:@"E-Mail" message:@"Möchten Sie eine E-Mail verfassen?" delegate:self cancelButtonTitle:@"Abbrechen" otherButtonTitles:@"E-Mail schreiben", nil];
+        self.externalMapPermissionAlertView = [[UIAlertView alloc] initWithTitle:@"Karte" message:@"Möchten sie die Karte öffnen?" delegate:self cancelButtonTitle:@"Abbrechen" otherButtonTitles:@"Karte öffnen", nil];
         self.externalAppPermissionAlertView = [[UIAlertView alloc] initWithTitle:@"Leave this app?" message:@"This web page is trying to open an outside app. Do you want to open it?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Open App", nil];
     }
 
@@ -491,7 +497,19 @@
         }
         else if([[UIApplication sharedApplication] canOpenURL:URL]) {
             self.URLToLaunchWithPermission = URL;
-            [self.externalAppPermissionAlertView show];
+            if([URL.scheme hasPrefix:@"tel"]) {
+
+                [self.externalTelAppPermissionAlertView show];
+            } else if([URL.scheme hasPrefix:@"mailto"]) {
+
+                [self.externalMailAppPermissionAlertView show];
+            } else if([URL.scheme hasPrefix:@"maps"]) {
+
+                [self.externalMapPermissionAlertView show];
+            } else {
+
+                [self.externalAppPermissionAlertView show];
+            }
             decisionHandler(WKNavigationActionPolicyCancel);
             return;
         }
@@ -500,9 +518,8 @@
 }
 
 #pragma mark - UIAlertViewDelegate
-
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    if(alertView == self.externalAppPermissionAlertView) {
+    if(alertView == self.externalAppPermissionAlertView || alertView == self.externalTelAppPermissionAlertView || alertView == self.externalMailAppPermissionAlertView || alertView == self.externalMapPermissionAlertView) {
         if(buttonIndex != alertView.cancelButtonIndex) {
             [[UIApplication sharedApplication] openURL:self.URLToLaunchWithPermission];
         }
